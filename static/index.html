@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comment Service</title>
+</head>
+<body>
+  <h1>Comment Service</h1>
+
+  <div>
+  <input id="post-id" placeholder="Post ID" type="number" />
+  <input id="user" placeholder="User ID" />
+  <input id="content" placeholder="Comment" />
+  <button type="button" id="post-comment-btn">Post Comment </button>
+ </div>
+
+  <h2>Comments</h2>
+  <ul id="comment-list"></ul>
+
+  <script>
+    const apiBase = "http://127.0.0.1:8000/api";  // FastAPI 백엔드 주소
+
+    async function fetchComments() {
+      const postId = document.getElementById("post-id").value;
+      if (!postId) return;
+
+      const res = await fetch(`${apiBase}/comments?post_id=${postId}`);
+      const data = await res.json();
+      const list = document.getElementById("comment-list");
+      list.innerHTML = "";
+      data.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = `${c.user_id}: ${c.content}`;
+        list.appendChild(li);
+      });
+    }
+
+  async function createComment(e) {
+  const postId = document.getElementById("post-id").value;
+  const user = document.getElementById("user").value;
+  const content = document.getElementById("content").value;
+  console.log("postId:", postId, "user:", user, "content:", content);
+
+    if (!postId || !user || !content) {
+        alert("Post ID, User ID, Comment 모두 입력하세요!");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${apiBase}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: Number(postId), user_id: user, content: content })
+        });
+
+        if (!res.ok) {
+        const error = await res.text();
+        alert("댓글 등록 실패: " + error);
+        return;
+        }
+
+        document.getElementById("user").value = "";
+        document.getElementById("content").value = "";
+        fetchComments(); // 댓글 목록 새로고침
+    } catch (err) {
+        alert("네트워크 오류: " + err);
+    }
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("PRESSED");
+      fetchComments();
+      document.getElementById("post-comment-btn").addEventListener("click", createComment);
+    });
+
+    // post-id 입력 후 댓글 불러오기
+    document.getElementById("post-id").addEventListener("change", fetchComments);
+  </script>
+</body>
+</html>

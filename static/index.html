@@ -1,0 +1,45 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comment Test</title>
+</head>
+<body>
+  <h1>Comment Test</h1>
+  <input id="user" placeholder="User ID">
+  <input id="content" placeholder="Comment">
+  <button onclick="createComment()">Post Comment</button>
+
+  <h2>Comments</h2>
+  <ul id="comment-list"></ul>
+
+  <script>
+    const apiBase = "http://127.0.0.1:8000/api";
+
+    async function fetchComments() {
+      const res = await fetch(`${apiBase}/comments?post_id=1`);
+      const data = await res.json();
+      const list = document.getElementById("comment-list");
+      list.innerHTML = "";
+      data.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = `${c.user_id}: ${c.content}`;
+        list.appendChild(li);
+      });
+    }
+
+    async function createComment() {
+      const user = document.getElementById("user").value;
+      const content = document.getElementById("content").value;
+      await fetch(`${apiBase}/comments`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({post_id: 1, user_id: user, content: content})
+      });
+      fetchComments();
+    }
+
+    fetchComments();
+  </script>
+</body>
+</html> -->

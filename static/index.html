@@ -12,6 +12,7 @@
   <input id="user" placeholder="User ID" />
   <input id="content" placeholder="Comment" />
   <button type="button" id="post-comment-btn">Post Comment </button>
+
  </div>
 
   <h2>Comments</h2>
@@ -23,18 +24,93 @@
     async function fetchComments() {
       const postId = document.getElementById("post-id").value;
       if (!postId) return;
-
       const res = await fetch(`${apiBase}/comments?post_id=${postId}`);
       const data = await res.json();
       const list = document.getElementById("comment-list");
       list.innerHTML = "";
       data.forEach(c => {
         const li = document.createElement("li");
-        li.textContent = `${c.user_id}: ${c.content}`;
+        // 기본 댓글 내용
+        let contentSpan = document.createElement("span");
+        contentSpan.textContent = `${c.user_id}: ${c.content} `;
+        li.appendChild(contentSpan);
+
+        // Edit 버튼
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = function() {
+          // input과 Save/Cancel 버튼 생성
+          li.innerHTML = "";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = c.content;
+          li.appendChild(document.createTextNode(`${c.user_id}: `));
+          li.appendChild(input);
+
+          const saveBtn = document.createElement("button");
+          saveBtn.textContent = "Save";
+          saveBtn.onclick = async function() {
+            await updateComment(c.id, input.value);
+          };
+          li.appendChild(saveBtn);
+
+          const cancelBtn = document.createElement("button");
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.onclick = function() {
+            fetchComments();
+          };
+          li.appendChild(cancelBtn);
+        };
+        li.appendChild(editBtn);
+
+        // Delete 버튼
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.onclick = async function() {
+          if (confirm("댓글 삭제를 진행하시겠습니까 ?")) {
+            await deleteComment(c.id);
+            fetchComments();
+          }
+        };
+        li.appendChild(delBtn);
+
         list.appendChild(li);
       });
     }
 
+    async function updateComment(commentId, newContent) {
+      try {
+        const res = await fetch(`${apiBase}/comments/${commentId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: newContent })
+        });
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 수정 실패: " + error);
+        } else {
+          fetchComments(); // 댓글 목록 새로고침
+        }
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
+    }
+
+    async function deleteComment(commentId) {
+      try {
+        const res = await fetch(`${apiBase}/comments/${commentId}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 삭제 실패: " + error);
+        }
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
+    }
+
+// -------------------------------------> 댓글 생성 함수 
   async function createComment(e) {
   const postId = document.getElementById("post-id").value;
   const user = document.getElementById("user").value;

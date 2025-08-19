@@ -1,2 +1,2 @@
 # AWS-Community-Project
-Creating a community site with aws base
+Creating a community site based of AWS 

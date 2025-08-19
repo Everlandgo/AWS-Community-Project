@@ -20,7 +20,7 @@
 
   <script>
     const apiBase = "http://127.0.0.1:8000/api";  // FastAPI 백엔드 주소
-
+    
     async function fetchComments() {
       const postId = document.getElementById("post-id").value;
       if (!postId) return;
@@ -34,17 +34,6 @@
         let contentSpan = document.createElement("span");
         contentSpan.textContent = `${c.user_id}: ${c.content} `;
         li.appendChild(contentSpan);
-
-        // 수정 날짜 표시
-        if (c.updated_at) {
-          const updatedAt = new Date(c.updated_at);
-          const dateSpan = document.createElement("span");
-          dateSpan.style.fontSize = "0.8em";
-          dateSpan.style.color = "#888";
-          dateSpan.style.marginLeft = "8px";
-          dateSpan.textContent = `(${updatedAt.getFullYear()}-${String(updatedAt.getMonth()+1).padStart(2,'0')}-${String(updatedAt.getDate()).padStart(2,'0')} ${String(updatedAt.getHours()).padStart(2,'0')}:${String(updatedAt.getMinutes()).padStart(2,'0')})   `;
-          li.appendChild(dateSpan);
-        }
 
         //-----------> Edit button
         const editBtn = document.createElement("button");
@@ -126,6 +115,15 @@
   const user = document.getElementById("user").value;
   const content = document.getElementById("content").value;
   console.log("postId:", postId, "user:", user, "content:", content);
+
+    // 금지어 체크
+    const forbiddenWords = ["바보", "멍청이"];
+    for (const word of forbiddenWords) {
+      if (content.includes(word)) {
+        alert("금지어가 포함되어 있습니다.");
+        return;
+      }
+    }
 
     if (!postId || !user || !content) {
         alert("Post ID, User ID, Comment 모두 입력하세요!");

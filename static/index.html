@@ -35,7 +35,7 @@
         contentSpan.textContent = `${c.user_id}: ${c.content} `;
         li.appendChild(contentSpan);
 
-        // Edit 버튼
+        //-----------> Edit button
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.onclick = function() {
@@ -50,6 +50,10 @@
           const saveBtn = document.createElement("button");
           saveBtn.textContent = "Save";
           saveBtn.onclick = async function() {
+            if (!input.value.trim()) {
+              alert("댓글 내용을 입력하세요!");
+              return;
+            }
             await updateComment(c.id, input.value);
           };
           li.appendChild(saveBtn);
@@ -63,7 +67,7 @@
         };
         li.appendChild(editBtn);
 
-        // Delete 버튼
+        // -----------> Delete button
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.onclick = async function() {
@@ -77,11 +81,10 @@
         list.appendChild(li);
       });
     }
-
     async function updateComment(commentId, newContent) {
       try {
         const res = await fetch(`${apiBase}/comments/${commentId}`, {
-          method: "PUT",
+          method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: newContent })
         });

@@ -35,6 +35,17 @@
         contentSpan.textContent = `${c.user_id}: ${c.content} `;
         li.appendChild(contentSpan);
 
+        // 수정 날짜 표시
+        if (c.updated_at) {
+          const updatedAt = new Date(c.updated_at);
+          const dateSpan = document.createElement("span");
+          dateSpan.style.fontSize = "0.8em";
+          dateSpan.style.color = "#888";
+          dateSpan.style.marginLeft = "8px";
+          dateSpan.textContent = `(${updatedAt.getFullYear()}-${String(updatedAt.getMonth()+1).padStart(2,'0')}-${String(updatedAt.getDate()).padStart(2,'0')} ${String(updatedAt.getHours()).padStart(2,'0')}:${String(updatedAt.getMinutes()).padStart(2,'0')})   `;
+          li.appendChild(dateSpan);
+        }
+
         //-----------> Edit button
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
@@ -50,10 +61,6 @@
           const saveBtn = document.createElement("button");
           saveBtn.textContent = "Save";
           saveBtn.onclick = async function() {
-            if (!input.value.trim()) {
-              alert("댓글 내용을 입력하세요!");
-              return;
-            }
             await updateComment(c.id, input.value);
           };
           li.appendChild(saveBtn);
@@ -61,7 +68,7 @@
           const cancelBtn = document.createElement("button");
           cancelBtn.textContent = "Cancel";
           cancelBtn.onclick = function() {
-            fetchComments();
+            fetchComments(); // 댓글 목록을 새로고침하여 기본 형태로 복원
           };
           li.appendChild(cancelBtn);
         };

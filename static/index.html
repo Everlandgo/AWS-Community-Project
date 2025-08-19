@@ -35,7 +35,16 @@
         contentSpan.textContent = `${c.user_id}: ${c.content} `;
         li.appendChild(contentSpan);
 
-        //-----------> Edit button
+        // 작성 시간 표시
+        if (c.created_at) {
+          const createdAt = new Date(c.created_at);
+          const dateSpan = document.createElement("span");
+          dateSpan.style.fontSize = "0.8em";
+          dateSpan.style.color = "#888";
+          dateSpan.style.marginLeft = "8px";
+          dateSpan.textContent = `(${createdAt.getFullYear()}/${String(createdAt.getMonth()+1).padStart(2,'0')}/${String(createdAt.getDate()).padStart(2,'0')}) `;
+          li.appendChild(dateSpan);
+        }
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.onclick = function() {
@@ -57,7 +66,7 @@
           const cancelBtn = document.createElement("button");
           cancelBtn.textContent = "Cancel";
           cancelBtn.onclick = function() {
-            fetchComments(); // 댓글 목록을 새로고침하여 기본 형태로 복원
+            fetchComments(); 
           };
           li.appendChild(cancelBtn);
         };
@@ -116,14 +125,6 @@
   const content = document.getElementById("content").value;
   console.log("postId:", postId, "user:", user, "content:", content);
 
-    // 금지어 체크
-    const forbiddenWords = ["바보", "멍청이"];
-    for (const word of forbiddenWords) {
-      if (content.includes(word)) {
-        alert("금지어가 포함되어 있습니다.");
-        return;
-      }
-    }
 
     if (!postId || !user || !content) {
         alert("Post ID, User ID, Comment 모두 입력하세요!");

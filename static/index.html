@@ -24,7 +24,7 @@
     async function fetchComments() {
       const postId = document.getElementById("post-id").value;
       if (!postId) return;
-      const res = await fetch(`${apiBase}/comments?post_id=${postId}`);
+      const res = await fetch(`${apiBase}/comments/${postId}/comments`);
       const data = await res.json();
       const list = document.getElementById("comment-list");
       list.innerHTML = "";
@@ -86,6 +86,38 @@
         list.appendChild(li);
       });
     }
+    async function createComment(e) {
+      const postId = document.getElementById("post-id").value;
+      const user = document.getElementById("user").value;
+      const content = document.getElementById("content").value;
+      console.log("postId:", postId, "user:", user, "content:", content);
+
+      if (!postId || !user || !content) {
+        alert("Post ID, User ID, Comment 모두 입력하세요!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${apiBase}/comments/${postId}/comments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ post_id: Number(postId), user_id: user, content: content })
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 등록 실패: " + error);
+          return;
+        }
+
+        document.getElementById("user").value = "";
+        document.getElementById("content").value = "";
+        fetchComments(); // 댓글 목록 새로고침
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
+    }
+
     async function updateComment(commentId, newContent) {
       try {
         const res = await fetch(`${apiBase}/comments/${commentId}`, {
@@ -118,39 +150,6 @@
       }
     }
 
-// -------------------------------------> 댓글 생성 함수 
-  async function createComment(e) {
-  const postId = document.getElementById("post-id").value;
-  const user = document.getElementById("user").value;
-  const content = document.getElementById("content").value;
-  console.log("postId:", postId, "user:", user, "content:", content);
-
-
-    if (!postId || !user || !content) {
-        alert("Post ID, User ID, Comment 모두 입력하세요!");
-        return;
-    }
-
-    try {
-        const res = await fetch(`${apiBase}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post_id: Number(postId), user_id: user, content: content })
-        });
-
-        if (!res.ok) {
-        const error = await res.text();
-        alert("댓글 등록 실패: " + error);
-        return;
-        }
-
-        document.getElementById("user").value = "";
-        document.getElementById("content").value = "";
-        fetchComments(); // 댓글 목록 새로고침
-    } catch (err) {
-        alert("네트워크 오류: " + err);
-    }
-    }
     document.addEventListener("DOMContentLoaded", function() {
       console.log("PRESSED");
       fetchComments();

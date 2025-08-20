@@ -25,9 +25,6 @@ def health_check():
 
 
 # static/index.html 제공
-<<<<<<< HEAD
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
-=======
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # 테스트 용도 ! 
@@ -44,7 +41,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
->>>>>>> trial
 
 
 # static/index.html 제공

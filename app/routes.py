@@ -4,12 +4,16 @@ from . import crud, schemas, db
 
 router = APIRouter()
 
-@router.get("/comments", response_model=list[schemas.CommentOut])
+# GET: /comments/{post_id}/comments
+@router.get("/comments/{post_id}/comments", response_model=list[schemas.CommentOut])
 def get_comments(post_id: int, skip: int = 0, limit: int = 10, db_sess: Session = Depends(db.get_db)):
     return crud.list_comments(db_sess, post_id, skip, limit)
 
-@router.post("/comments", response_model=schemas.CommentOut)
-def create_comment(payload: schemas.CommentCreate, db_sess: Session = Depends(db.get_db)):
+# POST: /comments/{post_id}/comments
+@router.post("/comments/{post_id}/comments", response_model=schemas.CommentOut)
+def create_comment(post_id: int, payload: schemas.CommentCreate, db_sess: Session = Depends(db.get_db)):
+    # post_id를 payload에 넣어줌 (혹은 payload에서 post_id를 사용)
+    payload.post_id = post_id
     return crud.create_comment(db_sess, payload)
 
 @router.patch("/comments/{comment_id}", response_model=schemas.CommentOut)

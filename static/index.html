@@ -1,45 +1,163 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Comment Test</title>
+  <title>Comment Service</title>
 </head>
 <body>
-  <h1>Comment Test</h1>
-  <input id="user" placeholder="User ID">
-  <input id="content" placeholder="Comment">
-  <button onclick="createComment()">Post Comment</button>
+  <h1>Comment Service</h1>
+
+  <div>
+  <input id="post-id" placeholder="Post ID" type="number" />
+  <input id="user" placeholder="User ID" />
+  <input id="content" placeholder="Comment" />
+  <button type="button" id="post-comment-btn">Post Comment </button>
+
+ </div>
 
   <h2>Comments</h2>
   <ul id="comment-list"></ul>
 
   <script>
-    const apiBase = "http://127.0.0.1:8000/api";
-
+    const apiBase = "http://127.0.0.1:8000/api";  // FastAPI 백엔드 주소
+    
     async function fetchComments() {
-      const res = await fetch(`${apiBase}/comments?post_id=1`);
+      const postId = document.getElementById("post-id").value;
+      if (!postId) return;
+      const res = await fetch(`${apiBase}/comments/${postId}/comments`);
       const data = await res.json();
       const list = document.getElementById("comment-list");
       list.innerHTML = "";
       data.forEach(c => {
         const li = document.createElement("li");
-        li.textContent = `${c.user_id}: ${c.content}`;
+        // 기본 댓글 내용
+        let contentSpan = document.createElement("span");
+        contentSpan.textContent = `${c.user_id}: ${c.content} `;
+        li.appendChild(contentSpan);
+
+        // 작성 시간 표시
+        if (c.created_at) {
+          const createdAt = new Date(c.created_at);
+          const dateSpan = document.createElement("span");
+          dateSpan.style.fontSize = "0.8em";
+          dateSpan.style.color = "#888";
+          dateSpan.style.marginLeft = "8px";
+          dateSpan.textContent = `(${createdAt.getFullYear()}/${String(createdAt.getMonth()+1).padStart(2,'0')}/${String(createdAt.getDate()).padStart(2,'0')}) `;
+          li.appendChild(dateSpan);
+        }
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = function() {
+          // input과 Save/Cancel 버튼 생성
+          li.innerHTML = "";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = c.content;
+          li.appendChild(document.createTextNode(`${c.user_id}: `));
+          li.appendChild(input);
+
+          const saveBtn = document.createElement("button");
+          saveBtn.textContent = "Save";
+          saveBtn.onclick = async function() {
+            await updateComment(c.id, input.value);
+          };
+          li.appendChild(saveBtn);
+
+          const cancelBtn = document.createElement("button");
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.onclick = function() {
+            fetchComments(); 
+          };
+          li.appendChild(cancelBtn);
+        };
+        li.appendChild(editBtn);
+
+        // -----------> Delete button
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.onclick = async function() {
+          if (confirm("댓글 삭제를 진행하시겠습니까 ?")) {
+            await deleteComment(c.id);
+            fetchComments();
+          }
+        };
+        li.appendChild(delBtn);
+
         list.appendChild(li);
       });
     }
-
-    async function createComment() {
+    async function createComment(e) {
+      const postId = document.getElementById("post-id").value;
       const user = document.getElementById("user").value;
       const content = document.getElementById("content").value;
-      await fetch(`${apiBase}/comments`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({post_id: 1, user_id: user, content: content})
-      });
-      fetchComments();
+      console.log("postId:", postId, "user:", user, "content:", content);
+
+      if (!postId || !user || !content) {
+        alert("Post ID, User ID, Comment 모두 입력하세요!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${apiBase}/comments/${postId}/comments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ post_id: Number(postId), user_id: user, content: content })
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 등록 실패: " + error);
+          return;
+        }
+
+        document.getElementById("user").value = "";
+        document.getElementById("content").value = "";
+        fetchComments(); // 댓글 목록 새로고침
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
     }
 
-    fetchComments();
+    async function updateComment(commentId, newContent) {
+      try {
+        const res = await fetch(`${apiBase}/comments/${commentId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: newContent })
+        });
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 수정 실패: " + error);
+        } else {
+          fetchComments(); // 댓글 목록 새로고침
+        }
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
+    }
+
+    async function deleteComment(commentId) {
+      try {
+        const res = await fetch(`${apiBase}/comments/${commentId}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) {
+          const error = await res.text();
+          alert("댓글 삭제 실패: " + error);
+        }
+      } catch (err) {
+        alert("네트워크 오류: " + err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("PRESSED");
+      fetchComments();
+      document.getElementById("post-comment-btn").addEventListener("click", createComment);
+    });
+
+    // post-id 입력 후 댓글 불러오기
+    document.getElementById("post-id").addEventListener("change", fetchComments);
   </script>
 </body>
-</html> -->
+</html>

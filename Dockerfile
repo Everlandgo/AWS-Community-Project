@@ -1,6 +1,13 @@
 # 1. 베이스 이미지 선택
 FROM python:3.9-slim
 
+RUN apt-get update && apt-get install -y \
+    bash \
+    curl \
+    iputils-ping \
+    dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+
 # 2. 작업 디렉토리 설정
 WORKDIR /app
 # 2-1. DB 폴더 생성 (선택 사항)

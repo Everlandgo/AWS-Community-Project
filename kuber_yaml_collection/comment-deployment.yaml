@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-deployment
+  namespace: community
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comment-service
+  template:
+    metadata:
+      labels:
+        app: comment-service
+    spec:
+      containers:
+        - name: comment-service
+          image: juliesong/comment-service-2:latest
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-service
+  namespace: community
+spec:
+  selector:
+    app: comment-service
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8000        # Cluster 내부 포트
+      targetPort: 8000  # Pod 컨테이너 포트
+      nodePort: 32092   # 외부 접속용 포트 (30000~32767)

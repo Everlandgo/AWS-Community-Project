@@ -26,3 +26,22 @@ def health_check():
 
 # static/index.html 제공
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+
+# static/index.html 제공
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+# 테스트 용도 ! 
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "*",  # 테스트용으로 모든 도메인 허용
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
